@@ -21,9 +21,9 @@ import java.util.Set;
  * class you will be writing unit tests for.
  */
 public class SecurityService {
-    private FakeImageService fakeImageService;
-    private Set<StatusListener> statusListeners = new HashSet<>();
-    private SecurityRepository securityRepository;
+    private final FakeImageService fakeImageService;
+    private final Set<StatusListener> statusListeners = new HashSet<>();
+    private final SecurityRepository securityRepository;
 
     public SecurityService(SecurityRepository securityRepository, FakeImageService fakeImageService) {
         this.securityRepository = securityRepository;
@@ -57,7 +57,9 @@ public class SecurityService {
      * @param cat True if a cat is detected, otherwise false.
      */
     private void catDetected(Boolean cat) {
-        boolean sensorActive = securityRepository.getSensors().stream().anyMatch(Sensor::getActive);
+        boolean sensorActive = securityRepository.getSensors().stream().filter(Sensor::getActive)
+                .findAny()
+                .isPresent();
         if (cat && getArmingStatus() == ArmingStatus.ARMED_HOME) {
             setAlarmStatus(AlarmStatus.ALARM);
         } else if (!sensorActive) {
