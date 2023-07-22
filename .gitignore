@@ -5,7 +5,6 @@
 
 # Maven
 log/
-target/
 
 # Java
 config.properties
