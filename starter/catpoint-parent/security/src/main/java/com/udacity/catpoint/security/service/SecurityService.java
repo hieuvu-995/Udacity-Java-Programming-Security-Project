@@ -40,6 +40,7 @@ public class SecurityService {
         } else {
             if (securityRepository.getArmingStatus() == ArmingStatus.DISARMED && securityRepository.getCatDetected()) {
                 setAlarmStatus(AlarmStatus.ALARM);
+                statusListeners.forEach(l -> l.notify(AlarmStatus.ALARM));
             }
             List<Sensor> sensors = new ArrayList<>(securityRepository.getSensors());
             for (Sensor sensor : sensors) {
@@ -107,17 +108,8 @@ public class SecurityService {
      * Internal method for updating the alarm status when a sensor has been deactivated
      */
     private void handleSensorDeactivated() {
-        AlarmStatus alarmStatus = securityRepository.getAlarmStatus();
-        if (alarmStatus == AlarmStatus.PENDING_ALARM) {
-            Set<Sensor> sensors = getSensors();
-            boolean anySensorActive = false;
-            for (Sensor sensor : sensors) {
-                if (sensor.getActive()) {
-                    anySensorActive = true;
-                    break;
-                }
-            }
-            if (!anySensorActive) {
+        if(securityRepository.getAlarmStatus() == AlarmStatus.PENDING_ALARM){
+            if (getSensors().stream().noneMatch(Sensor::getActive)) {
                 setAlarmStatus(AlarmStatus.NO_ALARM);
             }
         }
